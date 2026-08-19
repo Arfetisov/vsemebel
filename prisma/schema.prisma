@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MODERATOR
+  COMPANY
+  MEMBER
+}
+
+enum MessageSource {
+  TELEGRAM
+  MAX
+  WHATSAPP
+  WEB
+}
+
+enum MessageStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+enum RequestStatus {
+  NEW
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum OfferStatus {
+  DRAFT
+  ACTIVE
+  EXPIRED
+}
+
+enum ContentAccessLevel {
+  PUBLIC
+  MEMBERS
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  role         UserRole @default(MEMBER)
+  company      Company? @relation(fields: [companyId], references: [id])
+  companyId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  moderatedMessages FeedMessage[] @relation("Moderator")
+}
+
+// Профиль компании — карточка в каталоге + личный кабинет
+model Company {
+  id                 String   @id @default(cuid())
+  name               String
+  slug               String   @unique
+  description        String?
+  category           String?
+  address            String?
+  phone              String?
+  website            String?
+  logoUrl            String?
+  // сообщения от таких компаний публикуются в ленте сразу, без модерации
+  isTrustedPublisher Boolean  @default(false)
+  telegramChatId     String?
+  maxChatId          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  users        User[]
+  requests     Request[]
+  feedMessages FeedMessage[]
+  offers       Offer[]
+
+  @@index([category])
+}
+
+// Заявки (входящие обращения к компаниям через портал)
+model Request {
+  id          String        @id @default(cuid())
+  company     Company       @relation(fields: [companyId], references: [id])
+  companyId   String
+  title       String
+  description String?
+  contactName String?
+  contactInfo String?
+  status      RequestStatus @default(NEW)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([companyId, status])
+}
+
+// Сообщение, импортированное из Telegram/MAX/WhatsApp в общую ленту портала
+model FeedMessage {
+  id            String        @id @default(cuid())
+  source        MessageSource
+  sourceMsgId   String?
+  company       Company?      @relation(fields: [companyId], references: [id])
+  companyId     String?
+  authorName    String?
+  content       String
+  attachmentUrl String?
+  status        MessageStatus @default(PENDING)
+  moderator     User?         @relation("Moderator", fields: [moderatorId], references: [id])
+  moderatorId   String?
+  moderatedAt   DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@index([status, createdAt])
+}
+
+// Персональное предложение/акция, привязанная к конкретной компании
+model Offer {
+  id          String      @id @default(cuid())
+  company     Company     @relation(fields: [companyId], references: [id])
+  companyId   String
+  title       String
+  description String?
+  category    String?
+  ctaLabel    String?
+  ctaUrl      String?
+  status      OfferStatus @default(DRAFT)
+  validFrom   DateTime?
+  validUntil  DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([companyId, status])
+}
+
+// Статьи/аналитика с управляемым уровнем доступа (публично / только для участников)
+model ContentPage {
+  id          String              @id @default(cuid())
+  slug        String              @unique
+  title       String
+  body        String
+  accessLevel ContentAccessLevel  @default(PUBLIC)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
