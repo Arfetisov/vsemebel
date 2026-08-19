@@ -5,6 +5,7 @@ const links = [
   { href: "/feed", label: "Лента сообщества" },
   { href: "/login", label: "Вход" },
   { href: "/register", label: "Регистрация" },
+  { href: "/admin", label: "Панель управления" },
 ];
 
 export default function Home() {

@@ -1,14 +1,14 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { requireStaffSession } from "@/lib/require-staff";
 import { ModerationList } from "./moderation-list";
 
 export default async function ModerationPage() {
-  const session = await auth();
-  const role = (session?.user as { role?: string } | undefined)?.role;
+  const { session, isStaff } = await requireStaffSession();
 
   if (!session) redirect("/login");
-  if (role !== "ADMIN" && role !== "MODERATOR") redirect("/feed");
+  if (!isStaff) redirect("/feed");
 
   const messages = await prisma.feedMessage.findMany({
     where: { status: "PENDING" },
@@ -18,7 +18,10 @@ export default async function ModerationPage() {
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <h1 className="mb-6 text-2xl font-semibold">Модерация ленты</h1>
+      <Link href="/admin" className="text-sm text-gray-500 hover:underline">
+        ← Панель управления
+      </Link>
+      <h1 className="mb-6 mt-2 text-2xl font-semibold">Модерация ленты</h1>
       <ModerationList messages={messages} />
     </main>
   );
