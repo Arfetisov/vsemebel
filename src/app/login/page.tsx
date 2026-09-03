@@ -30,6 +30,7 @@ export default function LoginPage() {
     }
 
     router.push("/catalog");
+    router.refresh();
   }
 
   return (
