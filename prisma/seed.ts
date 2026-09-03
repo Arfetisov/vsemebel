@@ -61,6 +61,29 @@ async function main() {
     },
   });
 
+  await prisma.homepageSettings.upsert({
+    where: { id: "singleton" },
+    update: {},
+    create: {
+      id: "singleton",
+      announcementMessage: "Бизнес-завтрак для мебельщиков СПб · 12 сентября · осталось 8 мест",
+      announcementCtaLabel: "Записаться",
+      announcementCtaUrl: "https://t.me/vsemebel",
+      announcementActive: true,
+      eventTitle: "Мебельный бизнес-форум СПб ТПП",
+      eventStartsAt: new Date("2026-09-12T10:00:00+03:00"),
+      eventLocation: "Санкт-Петербург",
+      eventRegisterUrl: "https://t.me/vsemebel",
+      newsTitle: "ЛДСП подорожает на 6% с сентября",
+      newsSourceLabel: "Mebel-news.pro",
+      newsSourceUrl: "https://mebel-news.pro",
+      sponsorTitle: "Поставщик кромки «ЭджЛайн» — скидка 15% на первый заказ",
+      sponsorSubtitle: "Доставка по СПб от 500 п.м.",
+      sponsorCtaUrl: "https://example.com",
+      sponsorActive: true,
+    },
+  });
+
   console.log("Сиды загружены. Админ: admin@vse-mebel.ru / admin12345");
 }
 

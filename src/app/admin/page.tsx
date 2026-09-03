@@ -20,6 +20,10 @@ export default async function AdminHomePage() {
           <p className="font-medium">Модерация ленты</p>
           <p className="text-sm text-gray-500">Сообщения из Telegram/MAX, ожидающие проверки</p>
         </Link>
+        <Link href="/admin/homepage" className="rounded border p-4 hover:bg-gray-50">
+          <p className="font-medium">Главная страница</p>
+          <p className="text-sm text-gray-500">Анонс-полоса, ближайшее событие, новость, рекламный баннер</p>
+        </Link>
       </nav>
     </main>
   );

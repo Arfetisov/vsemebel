@@ -149,3 +149,32 @@ model ContentPage {
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
 }
+
+// Единственная строка настроек главной страницы (анонс-полоса, ближайшее событие,
+// новость отрасли, рекламный баннер). Каждый блок показывается только если заполнен
+// и помечен активным — управляется на /admin/homepage.
+model HomepageSettings {
+  id String @id @default("singleton")
+
+  announcementMessage String?
+  announcementCtaLabel String?
+  announcementCtaUrl   String?
+  announcementActive   Boolean @default(false)
+
+  eventTitle       String?
+  eventStartsAt    DateTime?
+  eventLocation    String?
+  eventCapacity    Int?
+  eventRegisterUrl String?
+
+  newsTitle       String?
+  newsSourceLabel String?
+  newsSourceUrl   String?
+
+  sponsorTitle    String?
+  sponsorSubtitle String?
+  sponsorCtaUrl   String?
+  sponsorActive   Boolean @default(false)
+
+  updatedAt DateTime @updatedAt
+}
